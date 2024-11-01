@@ -1,0 +1,31 @@
+services:
+  db-ecommerce:
+    image: postgres:13.16
+    labels:
+      environment: ${ENVIRONMENT}
+      db: postgres
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    networks:
+      -db-network:
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  flyway:
+    image: flyway/flyway:10.20-alpine
+    depends_on:
+      - db-ecommerce
+    volumes:
+        - ${PWD}/db/migration:/flyway/sql
+    command: -url=jdbc:postgresql://db-ecommerce:5432/$DB_NAME -schemas=flyway -user=$DB_USER -password=$DB_PASSWORD -baselineOnMigrate=false -connectRetries=60 migrate
+
+networks:
+  db-network:
+    driver: bridge
+
+volumes:
+  db-data:
