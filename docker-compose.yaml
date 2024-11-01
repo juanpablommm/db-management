@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      -db-network:
+      db-network:
     volumes:
       - db-data:/var/lib/postgresql/data
 
@@ -19,6 +19,8 @@ services:
     image: flyway/flyway:10.20-alpine
     depends_on:
       - db-ecommerce
+    networks:
+      db-network:
     volumes:
         - ${PWD}/db/migration:/flyway/sql
     command: -url=jdbc:postgresql://db-ecommerce:5432/$DB_NAME -schemas=flyway -user=$DB_USER -password=$DB_PASSWORD -baselineOnMigrate=false -connectRetries=60 migrate
